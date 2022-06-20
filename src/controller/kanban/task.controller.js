@@ -33,3 +33,27 @@ export const CreateTask = async (req, res) => {
         console.error(error);
     }
 }
+
+export const updateTask = (req, res) => {
+    // if (req.body.taskId === "" || !req.body.taskId) {
+    //     return res.send('Task id is required...')
+    // }
+
+    TaskModel.findByIdAndUpdate(req.body.taskId, {name: req.body.name,  $push: { description: { $each: [req.body.description] } } }, { upsert: true }, (err, task) => {
+        if (err) {
+            return res.send(err)
+        }
+
+        return res.send(task)
+    });
+}
+
+export const getTask = (req, res) => {
+    TaskModel.find({}, (err, task) => {
+        if (err) {
+            return res.send(err)
+        }
+
+        return res.send(task)
+    })
+}
