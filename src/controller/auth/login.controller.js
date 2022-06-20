@@ -35,7 +35,7 @@ export const Login = (req, res) => {
 
             res.cookie(String(user._id), token, {
                 path: '/',
-                expiresIn: new Date(Date.now() * 60 * 36000),
+                expiresIn: 7 * 24 * 3600 * 1000,
                 httpOnly: true,
             });
 
