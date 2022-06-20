@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
@@ -8,9 +9,15 @@ const TaskSchema = new Schema(
             type: String,
             required: [true, 'Task name is required...']
         },
-        description : [{
-            type: String,
-            minlength: 5
+        description: [{
+            body: {
+                type: String,
+                minlength: 3
+            },
+            date: {
+                type: Date,
+                default: Date.now()
+            },
         }]
     },
     {

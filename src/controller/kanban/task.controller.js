@@ -1,5 +1,6 @@
 import { BoardModel } from "../../model/board.model";
 import { TaskModel } from "../../model/task.model";
+import { v4 as uuidv4 } from 'uuid';
 
 export const CreateTask = async (req, res) => {
     const newTasks = new TaskModel({
@@ -39,7 +40,15 @@ export const updateTask = (req, res) => {
     //     return res.send('Task id is required...')
     // }
 
-    TaskModel.findByIdAndUpdate(req.body.taskId, {name: req.body.name,  $push: { description: { $each: [req.body.description] } } }, { upsert: true }, (err, task) => {
+    TaskModel.findByIdAndUpdate(req.body.taskId, {
+        name: req.body.name, $push: {
+            description: {
+                $each: [{
+                    body: req.body.description
+                }]
+            }
+        }
+    }, { new: true, upsert: true }, (err, task) => {
         if (err) {
             return res.send(err)
         }
@@ -50,6 +59,17 @@ export const updateTask = (req, res) => {
 
 export const getTask = (req, res) => {
     TaskModel.find({}, (err, task) => {
+        if (err) {
+            return res.send(err)
+        }
+
+        return res.send(task)
+    })
+}
+
+export const removeDescription = (req, res) => {
+    // console.log(req.query.desId);
+    TaskModel.findByIdAndUpdate(req.query.taskId, { $pull: { description: { _id: req.query.desId } } }, { upsert: false, multi: true }, (err, task) => {
         if (err) {
             return res.send(err)
         }

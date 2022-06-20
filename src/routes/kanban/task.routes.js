@@ -1,4 +1,4 @@
-import { CreateTask, getTask, updateTask } from "../../controller/kanban/task.controller"
+import { CreateTask, getTask, removeDescription, updateTask } from "../../controller/kanban/task.controller"
 import { VerifyMiddleware } from "../../middleware/verify.middleware"
 
 const TaskRoutes = (app) => {
@@ -9,6 +9,8 @@ const TaskRoutes = (app) => {
         .post(VerifyMiddleware, CreateTask)
         // Update Task Name , etc 
         .put(VerifyMiddleware, updateTask)
+        // Description array element delete 
+        .delete(VerifyMiddleware, removeDescription)
 }
 
 export default TaskRoutes
