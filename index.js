@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import { config } from "dotenv";
 import cors from 'cors'
 import mongoose from "mongoose";
-import UserRoutes from "./src/routes/auth/register.routes";
 import LoginRoute from "./src/routes/auth/login.routes";
 import cookieParser from "cookie-parser";
 import ProjectRoutes from "./src/routes/kanban/project.routes";
@@ -12,6 +11,9 @@ import BoardTaskRoute from "./src/routes/kanban/boardTask.routes";
 import TaskRoutes from "./src/routes/kanban/task.routes";
 import BoardDNDRoutes from "./src/routes/DragDrop/board.routes";
 import TaskDNDRoutes from "./src/routes/DragDrop/task.routes";
+import LogoutRoute from "./src/routes/auth/logout.routes";
+import RegisterRoutes from "./src/routes/auth/register.routes";
+import UserRoutes from "./src/routes/auth/user.routes";
 
 config();
 
@@ -42,8 +44,10 @@ mongoose.connect(`mongodb://127.0.0.1/${process.env.DB_NAME}`, {
 });
 
 // All Routes 
-UserRoutes(app);
+RegisterRoutes(app);
 LoginRoute(app);
+LogoutRoute(app)
+UserRoutes(app)
 ProjectRoutes(app);
 BoardRoutes(app);
 BoardTaskRoute(app);

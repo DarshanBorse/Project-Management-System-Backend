@@ -1,9 +1,11 @@
-import { CreateUser } from "../../controller/auth/register.controller"
+import { CreateUser } from "../../controller/auth/register.controller";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
-const UserRoutes = (app) => {
-    app.route('/api/v1/register')
-    // New User 
-    .post(CreateUser)
-}
+const RegisterRoutes = (app) => {
+  app
+    .route("/api/v1/register")
+    // New User
+    .post(authMiddleware, CreateUser);
+};
 
-export default UserRoutes;
+export default RegisterRoutes;

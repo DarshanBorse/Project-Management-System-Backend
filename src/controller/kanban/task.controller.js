@@ -1,79 +1,124 @@
 import { BoardModel } from "../../model/board.model";
 import { TaskModel } from "../../model/task.model";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export const CreateTask = async (req, res) => {
-    const newTasks = new TaskModel({
-        name: req.body.name
+  const newTasks = new TaskModel({
+    name: req.body.name,
+  });
+
+  if (!req.body.boardId || req.body.boardId === "") {
+    return res.send({
+      message: "Board id is required...",
     });
+  }
 
-    if (!req.body.boardId || req.body.boardId === '') {
-        return res.send({
-            message: "Board id is required..."
-        })
-    }
+  try {
+    await newTasks.save((error, task) => {
+      if (error) {
+        return res.send(error);
+      }
 
-    try {
-        await newTasks.save((error, task) => {
-            if (error) {
-                return res.send(error)
-            }
+      BoardModel.findByIdAndUpdate(
+        req.body.boardId,
+        { $push: { taskId: { $each: [task._id] } } },
+        { new: true, upsert: true },
+        (err) => {
+          if (err) {
+            return res.send(err);
+          }
+        }
+      );
 
-            BoardModel.findByIdAndUpdate(req.body.boardId, { $push: { taskId: { $each: [task._id] } } }, { new: true, upsert: true }, (err) => {
-                if (err) {
-                    return res.send(err)
-                }
-            })
-
-            return res.json({
-                id: task._id,
-                name: task.name
-            })
-        })
-    } catch (error) {
-        console.error(error);
-    }
-}
+      return res.json({
+        id: task._id,
+        name: task.name,
+      });
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 export const updateTask = (req, res) => {
-    // if (req.body.taskId === "" || !req.body.taskId) {
-    //     return res.send('Task id is required...')
-    // }
+  // if (req.body.taskId === "" || !req.body.taskId) {
+  //     return res.send('Task id is required...')
+  // }
 
-    TaskModel.findByIdAndUpdate(req.body.taskId, {
-        name: req.body.name, $push: {
-            description: {
-                $each: [{
-                    body: req.body.description
-                }]
-            }
-        }
-    }, { new: true, upsert: true }, (err, task) => {
-        if (err) {
-            return res.send(err)
-        }
+  TaskModel.findByIdAndUpdate(
+    req.body.taskId,
+    {
+      name: req.body.name,
+      $push: {
+        description: {
+          $each: [
+            {
+              body: req.body.description,
+            },
+          ],
+        },
+      },
+    },
+    { new: true, upsert: true },
+    (err, task) => {
+      if (err) {
+        return res.send(err);
+      }
 
-        return res.send(task)
-    });
-}
+      return res.send(task);
+    }
+  );
+};
 
 export const getTask = (req, res) => {
-    TaskModel.find({}, (err, task) => {
-        if (err) {
-            return res.send(err)
-        }
+  TaskModel.find({}, (err, task) => {
+    if (err) {
+      return res.send(err);
+    }
 
-        return res.send(task)
-    })
-}
+    return res.send(task);
+  });
+};
 
 export const removeDescription = (req, res) => {
-    // console.log(req.query.desId);
-    TaskModel.findByIdAndUpdate(req.query.taskId, { $pull: { description: { _id: req.query.desId } } }, { upsert: false, multi: true }, (err, task) => {
-        if (err) {
-            return res.send(err)
-        }
+  // console.log(req.query.desId);
+  TaskModel.findByIdAndUpdate(
+    req.query.taskId,
+    { $pull: { description: { _id: req.query.desId } } },
+    { upsert: false, multi: true },
+    (err, task) => {
+      if (err) {
+        return res.send(err);
+      }
 
-        return res.send(task)
-    })
-}
+      return res.send(task);
+    }
+  );
+};
+
+export const deleteTask = (req, res) => {
+  TaskModel.findById(req.query.taskId, (err, task) => {
+    if (err) {
+      return res.send(err);
+    }
+
+    BoardModel.findByIdAndUpdate(
+      req.query.boardId,
+      { $pull: { taskId: req.query.taskId } },
+      { upsert: false, multi: true },
+      (error) => {
+        if (error) {
+          return res.send(error);
+        }
+      }
+    );
+
+    TaskModel.findByIdAndDelete(req.query.taskId, (error, delTask) => {
+      if (error) {
+        return res.send(error);
+      }
+
+      return res.send(delTask);
+    });
+  });
+};
